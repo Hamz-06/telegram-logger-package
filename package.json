@@ -1,0 +1,22 @@
+{
+  "name": "telegram-error-logger",
+  "description": "Telegram logger to use for logging error messages",
+  "version": "0.0.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.t.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "tsc"
+  },
+  "repository": {
+    "url": "https://github.com/Hamz-06/telegram-logger-package/"
+  },
+  "author": "hamz-06",
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}
