@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- 937b5b8: 0.0.3 changeset v2 test
+
+## 0.0.3
+
+### Patch Changes
+
 - 9a433dc: test version
 
 ## 0.0.4
