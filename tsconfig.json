@@ -8,6 +8,10 @@
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
+    "declaration": true,
+    "typeRoots": [
+      "./src/index.d.ts"
+    ]
   },
   "include": [
     "src"

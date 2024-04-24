@@ -1,6 +1,7 @@
 /node_modules
 /src
-
+.github
+package-lock.json
 .DS_Store
 .env
 

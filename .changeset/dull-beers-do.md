@@ -2,4 +2,4 @@
 "telegram-error-logger": patch
 ---
 
-added goodybe type
+fixed ts file imports

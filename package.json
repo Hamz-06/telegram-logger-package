@@ -1,12 +1,17 @@
 {
   "name": "telegram-error-logger",
   "description": "Telegram logger to use for logging error messages",
+  "private": "false",
   "version": "0.0.2",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.t.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
+    "release": "npm run build && changeset publish",
     "lint": "tsc"
   },
   "repository": {

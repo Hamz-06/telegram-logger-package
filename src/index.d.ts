@@ -1,3 +1,3 @@
-import { HelloType, goodByeType } from "./types/client/client";
+import { HelloType, goodByeType } from "./types/client";
 
 export { HelloType, goodByeType }
