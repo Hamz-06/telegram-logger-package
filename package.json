@@ -1,7 +1,7 @@
 {
   "name": "telegram-error-logger",
   "description": "Telegram logger to use for logging error messages",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.t.ts",
