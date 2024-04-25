@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - '*'  # Adjust branch name as needed
+      - '**'  # Adjust branch name as needed
   pull_request:
     branches:
-      - '*'  # Adjust branch name as needed
+      - '**'  # Adjust branch name as needed
 
 jobs:
   build:
@@ -16,11 +16,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Install dependencies 📦👮
         run: npm install
 
-      - name: Lint code
+      - name: Lint code 🔍😀
         run: npm run lint
 
-      - name: Build
+      - name: Test code 🧪😇
+        run: npm run test
+
+      - name: Build 🛠️🔥🔥
         run: npm run build

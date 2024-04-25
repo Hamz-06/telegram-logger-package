@@ -2,20 +2,29 @@
   "name": "telegram-error-logger",
   "description": "Telegram logger to use for logging error messages",
   "version": "0.0.3",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.t.ts",
+  "types": "./dist/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist",
+    "package.json"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup",
     "release": "npm run build && changeset publish",
     "changeset": "changeset",
-    "lint": "tsc"
+    "lint": "tsc",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -25,6 +34,10 @@
   "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   }

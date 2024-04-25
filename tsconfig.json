@@ -9,12 +9,10 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "declaration": true,
-    "typeRoots": [
-      "./src/index.d.ts"
-    ]
   },
   "include": [
-    "src"
+    "src/",
+    "__tests__"
   ],
   "exclude": [
     "node_modules"

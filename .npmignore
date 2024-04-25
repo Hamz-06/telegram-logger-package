@@ -7,3 +7,7 @@ package-lock.json
 
 tsconfig.json
 tsup.config.ts
+/__tests__
+CHANGELOG.md
+
+jest.config.ts
