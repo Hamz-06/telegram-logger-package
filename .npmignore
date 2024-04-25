@@ -11,3 +11,4 @@ tsup.config.ts
 CHANGELOG.md
 
 jest.config.ts
+/coverage
