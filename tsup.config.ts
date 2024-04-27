@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   target: 'es2020',
-  entry: ['./src/index.ts'],
+  entry: ['./telegram-logger-pkg/src/index.ts'],
   format: ['cjs', 'esm'],
   splitting: false,
   sourcemap: true,
