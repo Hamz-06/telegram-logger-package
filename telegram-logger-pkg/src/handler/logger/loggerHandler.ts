@@ -1,36 +1,49 @@
 
-import { ILoggerHandler, Settings } from "../../types/logger";
-import TelegramBot from 'node-telegram-bot-api';
+import { ChannelId, ErrorTopicMap, ErrorType, ILoggerHandler } from "../../types/logger";
+import { MessageHandler } from "./messageHandler";
 
-export abstract class LoggerHandler implements ILoggerHandler {
-  protected telegramBot: TelegramBot;
-  private channelId: string;
-  private settings?: string[]; // need to find id of the chat
+export class LoggerHandler implements ILoggerHandler {
 
-  public constructor(token: string, channelId: string, settings?: Settings) {
-    this.telegramBot = new TelegramBot(token);
+  protected channelId: ChannelId;
+  protected errorTopic: ErrorTopicMap;
+  private messageHandler: MessageHandler;
+
+  public constructor(botToken: string, channelTopic: ErrorTopicMap, channelId: ChannelId) {
+
+    this.messageHandler = new MessageHandler(botToken)
+    this.errorTopic = channelTopic;
     this.channelId = channelId;
   }
-
-  debug(message: string): void {
-
+  public getErrors() {
+    return {
+      channelId: this.channelId,
+      errorTopicMap: this.errorTopic
+    }
   }
-  error(message: string): void {
+  private ErrorMessage(loggerType: ErrorType) {
+    return `You have not configure the ${loggerType} logger, add it to your config`
+  }
 
+  async debug(message: string) {
+    if (!this.errorTopic.debug) {
+      this.ErrorMessage('debug')
+      return;
+    }
+    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.debug)
+  }
+  async error(message: string) {
+    if (!this.errorTopic.error) {
+      this.ErrorMessage('error')
+      return;
+    }
+    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.error)
   }
   async info(message: string) {
-    const sendMessage = await this.telegramBot.sendMessage(this.channelId, message, { message_thread_id: 2 })
-    console.log(sendMessage)
-    return sendMessage
+    if (!this.errorTopic.info) {
+      this.ErrorMessage('info')
+      return;
+    }
+    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.info)
   }
-  // async getStatus() {
-  //   try {
-  //     const getChannel = await this.telegramBot.getUpdates()
-  //     console.log(JSON.stringify(getChannel, null, 2))
-  //     return getChannel
-  //   } catch (error) {
 
-  //   }
-
-  // }
 }
