@@ -1,13 +1,9 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - '**'  # Adjust branch name as needed
   pull_request:
     branches:
       - '**'  # Adjust branch name as needed
-
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -11,7 +11,7 @@
     "declaration": true,
   },
   "include": [
-    "src/",
+    "telegram-logger-pkg/src",
     "__tests__"
   ],
   "exclude": [
