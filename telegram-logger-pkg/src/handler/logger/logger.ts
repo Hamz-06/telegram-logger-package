@@ -1,15 +1,15 @@
 
 import { ChatTopic } from '../../model/chatTopic';
-import { ErrorInviteLinkMap } from '../../types/logger';
+import { ErrorInviteLinkMap, Settings } from '../../types/logger';
 import { LoggerHandler } from './loggerHandler';
 
 export class Logger extends LoggerHandler {
   static logger: Logger;
 
-  static initialise(botToken: string, errorInviteLink: ErrorInviteLinkMap) {
+  static initialise(botToken: string, errorInviteLink: ErrorInviteLinkMap, settings?: Settings) {
     if (!Logger.logger) {
       const { channelId, errorTopicMap } = ChatTopic.validate(errorInviteLink)
-      Logger.logger = new Logger(botToken, errorTopicMap, channelId);
+      Logger.logger = new Logger(botToken, errorTopicMap, channelId, settings);
     }
     return Logger.logger;
   }

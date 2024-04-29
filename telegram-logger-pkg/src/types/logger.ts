@@ -10,6 +10,15 @@ export type ErrorTopicMap = {
   [error in ErrorType]?: TopicId;
 }
 
+export type ErrorColorMap = {
+  [error in ErrorType]: string;
+}
+
+export enum ErrorColorEmum {
+  info = "\x1b[37m",
+  error = "\x1b[41m",
+  debug = "\x1b[43m"
+}
 export interface ILoggerHandler {
   error(message: string): void;
   debug(message: string): void;

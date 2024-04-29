@@ -1,5 +1,4 @@
-
-import { ChannelId, ErrorTopicMap, ErrorType, ILoggerHandler } from "../../types/logger";
+import { ChannelId, ErrorTopicMap, ErrorType, ILoggerHandler, Settings } from "../../types/logger";
 import { MessageHandler } from "./messageHandler";
 
 export class LoggerHandler implements ILoggerHandler {
@@ -8,10 +7,10 @@ export class LoggerHandler implements ILoggerHandler {
   protected errorTopic: ErrorTopicMap;
   private messageHandler: MessageHandler;
 
-  public constructor(botToken: string, channelTopic: ErrorTopicMap, channelId: ChannelId) {
-
-    this.messageHandler = new MessageHandler(botToken)
-    this.errorTopic = channelTopic;
+  public constructor(botToken: string, errorTopicMap: ErrorTopicMap, channelId: ChannelId, settings?: Settings) {
+    const messageSettings = MessageHandler.constructSettings(settings)
+    this.messageHandler = new MessageHandler(botToken, messageSettings, channelId, errorTopicMap)
+    this.errorTopic = errorTopicMap;
     this.channelId = channelId;
   }
   public getErrors() {
@@ -29,21 +28,21 @@ export class LoggerHandler implements ILoggerHandler {
       this.ErrorMessage('debug')
       return;
     }
-    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.debug)
+    await this.messageHandler.sendMessage(message, 'debug')
   }
   async error(message: string) {
     if (!this.errorTopic.error) {
       this.ErrorMessage('error')
       return;
     }
-    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.error)
+    await this.messageHandler.sendMessage(message, 'error')
   }
   async info(message: string) {
     if (!this.errorTopic.info) {
       this.ErrorMessage('info')
       return;
     }
-    await this.messageHandler.sendMessage(this.channelId, message, this.errorTopic.info)
+    await this.messageHandler.sendMessage(message, 'info')
   }
 
 }
