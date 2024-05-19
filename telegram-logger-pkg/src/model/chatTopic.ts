@@ -1,5 +1,8 @@
 import { ChannelId, ErrorInviteLinkMap, ErrorTopicMap, ErrorType, InviteLinkForTopic, TopicId } from "../../src/types/logger"
 
+type IsNumberParam = 'channelId' | 'topicId'
+
+
 class ChatTopic {
   static validate(errorInviteLink: ErrorInviteLinkMap) {
     const errorTopicMap: ErrorTopicMap = {}
@@ -12,34 +15,34 @@ class ChatTopic {
     })
     if (set.size < 1) throw new Error(`You must provide a topic channel with the appropiate error type`)
     if (set.size !== 1) {
-      throw new Error(`Channel Id is not the same for all error types, 
-      make sure you are in the same channel and create topics for that channel`)
+      throw new Error('Channel Id must be the same for all channels: ' + Array.from(set))
     }
-    const channelId = ChatTopic.getCorrectChannelId(set.values().next().value)
+    const channelId = this.isNumber(set.values().next().value, 'channelId')
+    const createNewChannelId = ChatTopic.createChannelId(channelId.toString())
     return {
-      channelId,
+      channelId: createNewChannelId,
       errorTopicMap
     }
   }
   //TODO: add more validation
-  static getCorrectChannelId = (channelId: ChannelId) => {
+  private static createChannelId = (channelId: ChannelId) => {
     return `-100${channelId}`
   }
 
-  static getChatId(chatInviteLink: InviteLinkForTopic) {
+  private static getChatId(chatInviteLink: InviteLinkForTopic) {
     const split = chatInviteLink.split('/');
     // TODO: Add more validation check channelid length 
     if (split.length !== 6) throw new Error('Invalid invite link')
-    const topicNumberId = ChatTopic.convertTopicIdToNumber(split[5] as string)
+    const topicNumberId = ChatTopic.isNumber(split[5] as string, 'topicId')
     return {
       channelId: split[4] as ChannelId,
       topicId: topicNumberId,
     };
   }
-  static convertTopicIdToNumber(topicId: string): TopicId {
-    const topicNumberId = parseInt(topicId)
-    if (isNaN(topicNumberId)) throw new Error(`Invalid topic Id ${topicId}, must be a stringified number`)
-    return topicNumberId
+  private static isNumber(value: string, type: IsNumberParam): number {
+    const intValue = Number(value)
+    if (isNaN(intValue)) throw new Error(`Invalid ${type} ${value}, must be a number`)
+    return intValue
   }
 }
 export { ChatTopic }
