@@ -1,5 +1,5 @@
 //TODO: change Error type to ErrorLog or something else
-export type ErrorType = 'info' | 'error' | 'debug'
+export type ErrorType = 'info' | 'error' | 'warn'
 
 //used by the user interface
 export type ErrorInviteLinkMap = {
@@ -10,27 +10,32 @@ export type ErrorTopicMap = {
   [error in ErrorType]?: TopicId;
 }
 
-export type ErrorColorMap = {
-  [error in ErrorType]: string;
-}
-
-export enum ErrorColorEmum {
-  info = "\x1b[37m",
-  error = "\x1b[41m",
-  debug = "\x1b[43m"
-}
 export interface ILoggerHandler {
   error(message: string): void;
-  debug(message: string): void;
+  warn(message: string): void;
   info(message: string): void;
 }
 
 export type Settings = {
-  displayConsoleLogs?: boolean;
-  showErrorStackTrace?: boolean;
+  displayLogs?: boolean;
+  useColoredLogs?: boolean;
+  displayStackTrace?: boolean;
 }
 
-export type ChannelId = string; //2100966365
-export type TopicId = number; //1
-//https://t.me/c/2100966365/1 (example)
-export type InviteLinkForTopic = `https://t.me/${string}/${string}`
+/**
+ * @example 2100966365
+ * 
+ */
+export type ChannelId = string;
+
+/**
+ * @example 1
+ * 
+ */
+export type TopicId = number;
+
+/**
+ * @example https://t.me/c/2100966365/1
+ * 
+ */
+export type InviteLinkForTopic = `https://t.me/c/${string}/${string}`

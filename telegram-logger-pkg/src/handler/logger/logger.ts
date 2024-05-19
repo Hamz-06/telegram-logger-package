@@ -1,4 +1,3 @@
-
 import { ChatTopic } from '../../model/chatTopic';
 import { ErrorInviteLinkMap, Settings } from '../../types/logger';
 import { LoggerHandler } from './loggerHandler';
