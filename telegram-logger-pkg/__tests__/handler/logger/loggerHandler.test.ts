@@ -1,5 +1,5 @@
-import { Logger } from "../../src/handler/logger/logger";
-import { ErrorInviteLinkMap } from "../../src/types/logger";
+import { Logger } from "../../../src/handler/logger/logger";
+import { ErrorInviteLinkMap } from "../../../src/types/logger";
 
 jest.mock('../../src/model/telegramBot', () => {
   return {

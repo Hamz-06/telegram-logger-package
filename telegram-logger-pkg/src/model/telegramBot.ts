@@ -13,20 +13,27 @@ class TelegramBot {
     this.botToken = botToken
   }
   async sendMessage(channelId: ChannelId, message: string, topicId: TopicId) {
-    try {
-      const messageUrl = this.constructUrl('sendMessage')
-      messageUrl.searchParams.append('chat_id', channelId)
-      messageUrl.searchParams.append('text', message)
-      // thread id 1 is the main channel so dont use thread 
-      if (topicId !== 1) {
-        messageUrl.searchParams.append('message_thread_id', topicId.toString())
-      }
 
-      await fetch(messageUrl, {
+    const messageUrl = this.constructUrl('sendMessage')
+    messageUrl.searchParams.append('chat_id', channelId)
+    messageUrl.searchParams.append('text', message)
+    // thread id 1 is the main channel so dont use thread 
+    if (topicId !== 1) {
+      messageUrl.searchParams.append('message_thread_id', topicId.toString())
+    }
+
+    try {
+      const res = await fetch(messageUrl, {
         method: 'POST'
-      })
-    } catch (error) {
-      console.log('failed to send message')
+      });
+      if (!res.ok) {
+        const resJson = await res.json()
+        // Handle HTTP errors
+        throw new Error(`HTTP telegram failed to send message error! status: ${res.status}, message: ${resJson?.description}`);
+      }
+    } catch (err) {
+      // This block catches both network errors and re-thrown HTTP errors
+      throw new Error(err instanceof Error ? err.message : String(err));
     }
   }
 

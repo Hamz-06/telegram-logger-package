@@ -1,56 +1,47 @@
-import { ChannelId, ErrorTopicMap, ErrorType, Settings } from "../../types/logger"
+import { Settings } from "../../types/logger"
 import { MessageSettings } from "../../types/messageSetting"
-import colors from 'colors'
 import { TelegramBot } from "../../model/telegramBot";
+import { ChatTopic } from "../../model/chatTopic";
+import { defaultOptionTrue } from "../../util/util";
+import { WithLogger, WithLoggerName } from "../../model/logBuilder";
 
-class MessageHandler {
+class MessageHandler<T> {
   private messageSettings: MessageSettings;
   private telegramBot: TelegramBot
-  private errorTopicMap: ErrorTopicMap
-  private channelId: ChannelId
+  private chatTopic: ChatTopic;
 
-  private errorColorMap: Record<ErrorType, (message: string) => void> = {
-    'info': (message: string) => colors.white(message),
-    'warn': (message: string) => colors.yellow(message),
-    'error': (message: string) => colors.underline(message),
-  }
-
-  constructor(botToken: string, settings: MessageSettings, channelId: ChannelId, errorTopicMap: ErrorTopicMap) {
+  constructor(botToken: string, chatTopic: ChatTopic, settings: MessageSettings) {
     this.telegramBot = new TelegramBot(botToken);
-    this.errorTopicMap = errorTopicMap;
-    this.channelId = channelId;
+    this.chatTopic = chatTopic;
     this.messageSettings = settings;
   }
 
-  async sendMessage(message: string, errorMessage: ErrorType) {
+  async sendMessage(loggerName: T, message: string) {
     // should be validated in the logger handler (so cast is fine)
-    const topicId = this.errorTopicMap[errorMessage] as number
 
-    await this.telegramBot.sendMessage(this.channelId, message, topicId)
-    //logs for console
-    if (this.messageSettings?.displayLogs) {
-      this.displayConsoleLogs(message, errorMessage)
+    const topicId = this.chatTopic.getTopicId(loggerName as string)
+
+    const withLogger = new WithLogger(message)
+    const withLoggerName = new WithLoggerName(loggerName as string)
+
+    withLogger.setNext(withLoggerName)
+    withLogger.handle(this.messageSettings);
+
+    if (this.messageSettings.displayTelegramLogs) {
+      await this.telegramBot.sendMessage(this.chatTopic.channelId, withLogger.defaultLoggerMessage, topicId)
+    }
+    if (this.messageSettings.displayConsoleLogs) {
+      console.log(withLogger.loggerMessage)
     }
   }
-
-  // TODO: implement a better way to build a error message 
-  private displayConsoleLogs(message: string, errorType: ErrorType) {
-    const useColoredLogs = this.messageSettings?.useColoredLogs
-    if (typeof useColoredLogs === 'undefined' || this.messageSettings?.useColoredLogs === false) {
-      console.log(message)
-    } else {
-      const logColor = this.errorColorMap[errorType]
-      console.log(logColor(message))
-    }
-  }
-
 
   static constructSettings(settings?: Settings): MessageSettings {
-    if (!settings) return {}
     return {
-      displayLogs: settings.displayLogs,
-      useColoredLogs: settings.useColoredLogs,
-      displayStackTrace: settings.displayStackTrace
+      displayTelegramLogs: settings?.displayTelegramLogs ?? defaultOptionTrue(),
+      displayConsoleLogs: settings?.displayConsoleLogs ?? defaultOptionTrue(),
+      useColoredLogs: settings?.useColoredLogs ?? !defaultOptionTrue(),
+      displayTime: settings?.displayTime ?? !defaultOptionTrue(),
+      useLoggerName: settings?.useLoggerName ?? defaultOptionTrue(),
     }
   }
 }

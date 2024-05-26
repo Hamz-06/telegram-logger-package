@@ -1,28 +1,66 @@
-import { ChannelId, ErrorInviteLinkMap, ErrorTopicMap, ErrorType, InviteLinkForTopic, TopicId } from "../../src/types/logger"
+import { ChannelId, ErrorInviteLinkMap, ErrorTopicMap, ErrorType, InviteLinkForTopic, NewErrorTopicMap, TopicId } from "../../src/types/logger"
 
 type IsNumberParam = 'channelId' | 'topicId'
 
 
 class ChatTopic {
-  static validate(errorInviteLink: ErrorInviteLinkMap) {
-    const errorTopicMap: ErrorTopicMap = {}
-    const set = new Set<ChannelId>();
+  private errorTopicMap: NewErrorTopicMap = {};
+  private channelIdSet = new Set<ChannelId>();
+  private loggerNameSet = new Set<string>();
 
-    Object.entries(errorInviteLink).map(([errorType, telegramInviteLink]) => {
-      const { channelId, topicId } = ChatTopic.getChatId(telegramInviteLink)
-      errorTopicMap[errorType as ErrorType] = topicId
-      set.add(channelId)
-    })
-    if (set.size < 1) throw new Error(`You must provide a topic channel with the appropiate error type`)
-    if (set.size !== 1) {
-      throw new Error('Channel Id must be the same for all channels: ' + Array.from(set))
+  public get channelId(): string {
+
+    if (this.channelIdSet.size <= 0) {
+      throw new Error('No channelId')
     }
-    const channelId = this.isNumber(set.values().next().value, 'channelId')
-    const createNewChannelId = ChatTopic.createChannelId(channelId.toString())
-    return {
-      channelId: createNewChannelId,
-      errorTopicMap
+    return this.channelIdSet.values().next().value
+  }
+  // TODO:ADD VALIDATION HERE
+  public getTopicId(loggerName: string): number {
+
+    const topicId = this.errorTopicMap[loggerName] || -1
+    if (topicId === -1) {
+      throw new Error(`No topicId found for ${loggerName}`)
     }
+
+    return topicId
+  }
+
+  validate(loggerName: string, loggerInviteLink: InviteLinkForTopic): void {
+
+    const _loggerSizeBefore = this.loggerNameSet.size;
+    const { channelId, topicId } = ChatTopic.getChatId(loggerInviteLink);
+
+    const newChannelId = ChatTopic.createChannelId(channelId)
+
+    this.channelIdSet.add(newChannelId);
+    this.loggerNameSet.add(loggerName);
+
+    const _loggerSizeAfter = this.loggerNameSet.size;
+    const _channelIdSizeAfter = this.channelIdSet.size;
+
+    if (_loggerSizeAfter === _loggerSizeBefore) {
+      throw new Error('Logger name must be unique');
+    }
+    if (_channelIdSizeAfter > 1) {
+      throw new Error('Channel Id must be the same for all channels');
+    }
+    this.errorTopicMap[loggerName] = topicId;
+
+    // Object.entries(errorInviteLink).map(([errorType, telegramInviteLink]) => {
+    //   errorTopicMap[errorType as ErrorType] = topicId
+    //   set.add(channelId)
+    // })
+    // if (set.size < 1) throw new Error(`You must provide a topic channel with the appropiate error type`)
+    // if (set.size !== 1) {
+    //   throw new Error('Channel Id must be the same for all channels: ' + Array.from(set))
+    // }
+    // const channelId = this.isNumber(set.values().next().value, 'channelId')
+    // const createNewChannelId = ChatTopic.createChannelId(channelId.toString())
+    // return {
+    //   channelId: '12',
+    //   'error': 1
+    // }
   }
   //TODO: add more validation
   private static createChannelId = (channelId: ChannelId) => {

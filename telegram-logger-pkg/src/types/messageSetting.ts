@@ -1,3 +1,4 @@
 import { Settings } from "./logger"
 
-export type MessageSettings = Pick<Settings, 'displayLogs' | 'useColoredLogs' | 'displayStackTrace'> 
+export type MessageSettings = Required<Pick<Settings,
+  'displayConsoleLogs' | 'useColoredLogs' | 'displayTime' | 'useLoggerName' | 'displayTelegramLogs'>>
