@@ -1,5 +1,13 @@
 # telegram-error-logger
 
+## 0.3.0
+
+### Minor Changes
+
+- 423cb80: Added generics for better type safety
+  Added custom settings (useColoredLogs, displayTime, displayTelegramLogs)
+  Added support for custom logger names
+
 ## 0.2.0
 
 ### Minor Changes
