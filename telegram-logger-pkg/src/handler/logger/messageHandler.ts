@@ -2,7 +2,6 @@ import { Settings } from "../../types/logger"
 import { MessageSettings } from "../../types/messageSetting"
 import { TelegramBot } from "../../model/telegramBot";
 import { ChatTopic } from "../../model/chatTopic";
-import { defaultOptionTrue } from "../../util/util";
 import { WithLogger, WithLoggerName } from "../../model/logBuilder";
 
 class MessageHandler<T> {
@@ -37,11 +36,11 @@ class MessageHandler<T> {
 
   static constructSettings(settings?: Settings): MessageSettings {
     return {
-      displayTelegramLogs: settings?.displayTelegramLogs ?? defaultOptionTrue(),
-      displayConsoleLogs: settings?.displayConsoleLogs ?? defaultOptionTrue(),
-      useColoredLogs: settings?.useColoredLogs ?? !defaultOptionTrue(),
-      displayTime: settings?.displayTime ?? !defaultOptionTrue(),
-      useLoggerName: settings?.useLoggerName ?? defaultOptionTrue(),
+      displayTelegramLogs: settings?.displayTelegramLogs ?? true,
+      displayConsoleLogs: settings?.displayConsoleLogs ?? true,
+      useColoredLogs: settings?.useColoredLogs ?? false,
+      displayTime: settings?.displayTime ?? false,
+      useLoggerName: settings?.useLoggerName ?? true,
     }
   }
 }

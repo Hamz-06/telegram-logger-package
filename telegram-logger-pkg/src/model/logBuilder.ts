@@ -1,5 +1,6 @@
 import colors from 'colors'
 import { MessageSettings } from '../types/messageSetting';
+import { MessageHandler } from '../handler/logger/messageHandler';
 
 // design pattern 
 // https://refactoring.guru/design-patterns/chain-of-responsibility
@@ -48,37 +49,47 @@ class WithLogger extends AbstractLogHandler {
 }
 
 class WithLoggerName extends AbstractLogHandler {
-  private _loggerName: string;
+  private readonly loggerName: string;
 
   constructor(loggerName: string) {
     super()
-    this._loggerName = loggerName;
+    this.loggerName = loggerName;
   }
-  private getColorFunction(loggerName: string): string {
-    switch (loggerName) {
+  private getColorFunction(strData: string): string {
+    switch (this.loggerName) {
       case 'info':
-        return colors.white(loggerName);
+        return colors.white(strData);
       case 'warn':
-        return colors.yellow(loggerName);
+        return colors.yellow(strData);
       case 'error':
-        return colors.red(loggerName);
+        return colors.red(strData);
       default:
-        return colors.blue(loggerName);
+        return colors.blue(strData);
     }
   }
   public handle(settings: MessageSettings) {
-    let coloredLogs: string;
+
+    let _loggerName = this.loggerName;
+
+    const useColon = () => {
+      const colon = ':'
+      if (settings.useColoredLogs) {
+        return this.getColorFunction(colon)
+      }
+      return colon
+    }
+
     if (!settings.useLoggerName) {
       return
     }
     if (settings.displayTime) {
-      const time = new Date().getTime();
-      this._loggerName = this._loggerName + ' ' + time
+      const time = Date.now();
+      _loggerName = this.loggerName + ' ' + time
     }
     if (settings.useColoredLogs) {
-      this._loggerName = this.getColorFunction(this._loggerName + ':' + ' ')
+      _loggerName = this.getColorFunction(this.loggerName)
     }
-    AbstractLogHandler._loggerMessage = this._loggerName + AbstractLogHandler._loggerMessage;
+    AbstractLogHandler._loggerMessage = _loggerName + useColon() + ' ' + AbstractLogHandler._loggerMessage;
     return super.handle(settings);
   }
 }
@@ -87,11 +98,8 @@ export { WithLoggerName, WithLogger }
 // const withLogger = new WithLogger('message')
 // const withLoggerName = new WithLoggerName('error')
 // const setting = {
-//   displayConsoleLogs: true,
-//   displayTelegramLogs: false,
-//   displayTime: true,
-//   useColoredLogs: true,
-//   useLoggerName: true
+//   ...MessageHandler.constructSettings({}),
+//   'useColoredLogs': true
 // }
 
 // withLogger.setNext(withLoggerName)
