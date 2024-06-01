@@ -1,5 +1,5 @@
 import { Logger } from "../../../src/handler/logger/logger";
-import { ErrorInviteLinkMap, InviteLinkForTopic } from "../../../src/types/logger";
+import { TelegramInviteLink } from "../../../src/types/logger";
 
 describe('Logger', () => {
   const botToken = 'your_bot_token';
@@ -45,9 +45,9 @@ describe('Logger', () => {
     })
   })
   describe('with an invalid telegram url', () => {
-    let incorrectTelegramUrl: InviteLinkForTopic
+    let incorrectTelegramUrl: TelegramInviteLink
     beforeAll(() => {
-      incorrectTelegramUrl = 'https://t.me/c/12/12/wrong' as InviteLinkForTopic
+      incorrectTelegramUrl = 'https://t.me/c/12/12/wrong' as TelegramInviteLink
     })
     it('should throw an error', () => {
       const logger1 = Logger.initialise<'warn' | 'info'>(botToken, {})

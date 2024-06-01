@@ -1,4 +1,4 @@
-import { InviteLinkForTopic, Settings } from '../../types/logger';
+import { TelegramInviteLink, Settings } from '../../types/logger';
 import { LoggerHandler } from './loggerHandler';
 
 export class Logger<T extends string> extends LoggerHandler<T> {
@@ -14,7 +14,7 @@ export class Logger<T extends string> extends LoggerHandler<T> {
     Logger.logger = null;
   }
 
-  with(loggerName: T, loggerInviteLink: InviteLinkForTopic): Logger<T> {
+  with(loggerName: T, loggerInviteLink: TelegramInviteLink): Logger<T> {
     this.appendNewChannel(loggerName, loggerInviteLink);
     return this;
   }

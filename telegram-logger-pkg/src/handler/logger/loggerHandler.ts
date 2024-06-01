@@ -1,5 +1,5 @@
 import { ChatTopic } from "../../model/chatTopic";
-import { ChannelId, ErrorTopicMap, ErrorType, ILoggerHandler, InviteLinkForTopic, Settings } from "../../types/logger";
+import { ILoggerHandler, TelegramInviteLink, Settings } from "../../types/logger";
 import { MessageHandler } from "./messageHandler";
 import colors from 'colors'
 
@@ -13,11 +13,9 @@ export class LoggerHandler<T> implements ILoggerHandler<T> {
 
     const messageSettings = MessageHandler.constructSettings(settings);
     this.messageHandler = new MessageHandler<T>(botToken, this.chatTopic, messageSettings);
-    // this.errorTopic = errorTopicMap;
-    // this.channelId = channelId;
   }
 
-  protected appendNewChannel(loggerName: T, loggerInviteLink: InviteLinkForTopic) {
+  protected appendNewChannel(loggerName: T, loggerInviteLink: TelegramInviteLink) {
     this.chatTopic.validate(loggerName as string, loggerInviteLink)
   }
 

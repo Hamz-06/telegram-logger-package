@@ -1,6 +1,6 @@
 
 import { ChatTopic } from '../../src/model/chatTopic'
-import { InviteLinkForTopic } from '../../src/types/logger'
+import { TelegramInviteLink } from '../../src/types/logger'
 
 describe('chatTopic model', () => {
   let chatTopicValidator: ChatTopic
@@ -48,7 +48,7 @@ describe('chatTopic model', () => {
     })
     it('should throw an error', () => {
       const validate = () => {
-        chatTopicValidator.validate('warn', 'https://t.me/c/12356/WRONG' as InviteLinkForTopic) //force conversion
+        chatTopicValidator.validate('warn', 'https://t.me/c/12356/WRONG' as TelegramInviteLink) //force conversion
       }
       expect(validate).toThrow('Invalid invite link')
     })
@@ -61,7 +61,7 @@ describe('chatTopic model', () => {
     it('should throw an error', () => {
       const validate = () => {
         chatTopicValidator.validate('warn', 'https://t.me/c/43/12') //force conversion
-        chatTopicValidator.validate('warn', 'https://t.me/c/WRONG/12' as InviteLinkForTopic) //force conversion
+        chatTopicValidator.validate('warn', 'https://t.me/c/WRONG/12' as TelegramInviteLink) //force conversion
       }
       expect(validate).toThrow('Invalid invite link')
     })
@@ -80,7 +80,7 @@ describe('chatTopic model', () => {
     })
     it.each(invalidUrls)('should throw an error for invalid url: %s', (invalidUrl) => {
       const validate = () => {
-        chatTopicValidator.validate('warn', invalidUrl as InviteLinkForTopic); // Force conversion
+        chatTopicValidator.validate('warn', invalidUrl as TelegramInviteLink); // Force conversion
       }
       expect(validate).toThrow('Invalid invite link');
     });

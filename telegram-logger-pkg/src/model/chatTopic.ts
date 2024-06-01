@@ -1,10 +1,10 @@
-import { ChannelId, InviteLinkForTopic, NewErrorTopicMap } from "../../src/types/logger"
+import { ChannelId, TelegramInviteLink, ErrorTopicMap } from "../../src/types/logger"
 
 type IsNumberParam = 'channelId' | 'topicId'
 
 
 class ChatTopic {
-  private errorTopicMap: NewErrorTopicMap = {};
+  private errorTopicMap: ErrorTopicMap = {};
   private channelIdSet = new Set<ChannelId>();
   private loggerNameSet = new Set<string>();
   private topicIdSet = new Set<number>();
@@ -26,7 +26,7 @@ class ChatTopic {
     return topicId
   }
 
-  validate(loggerName: string, loggerInviteLink: InviteLinkForTopic): void {
+  validate(loggerName: string, loggerInviteLink: TelegramInviteLink): void {
 
     const _loggerSizeBefore = this.loggerNameSet.size;
     const _topicIdSizBefore = this.topicIdSet.size;
@@ -60,13 +60,13 @@ class ChatTopic {
     return `-100${channelId}`
   }
 
-  private static validateInviteLink = (inviteLink: InviteLinkForTopic) => {
+  private static validateInviteLink = (inviteLink: TelegramInviteLink) => {
     const urlPattern = new RegExp('^https:\/\/t\\.me\\/c\\/\\d+\\/\\d+$');
     if (!urlPattern.test(inviteLink)) {
       throw new Error('Invalid invite link')
     };
   }
-  private static getChatId(chatInviteLink: InviteLinkForTopic) {
+  private static getChatId(chatInviteLink: TelegramInviteLink) {
     ChatTopic.validateInviteLink(chatInviteLink)
 
     const split = chatInviteLink.split('/');
