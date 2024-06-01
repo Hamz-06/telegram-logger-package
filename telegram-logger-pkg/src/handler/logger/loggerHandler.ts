@@ -1,10 +1,9 @@
-import { ChatTopic } from "../../model/chatTopic";
-import { ILoggerHandler, TelegramInviteLink, Settings } from "../../types/logger";
-import { MessageHandler } from "./messageHandler";
-import colors from 'colors'
+import { ChatTopic } from '../../model/chatTopic';
+import { ILoggerHandler, TelegramInviteLink, Settings } from '../../types/logger';
+import { MessageHandler } from './messageHandler';
+import colors from 'colors';
 
 export class LoggerHandler<T> implements ILoggerHandler<T> {
-
   private messageHandler: MessageHandler<T>;
   private chatTopic: ChatTopic;
 
@@ -16,7 +15,7 @@ export class LoggerHandler<T> implements ILoggerHandler<T> {
   }
 
   protected appendNewChannel(loggerName: T, loggerInviteLink: TelegramInviteLink) {
-    this.chatTopic.validate(loggerName as string, loggerInviteLink)
+    this.chatTopic.validate(loggerName as string, loggerInviteLink);
   }
 
   public async logMessage(logType: T, message: string) {
@@ -24,7 +23,7 @@ export class LoggerHandler<T> implements ILoggerHandler<T> {
       await this.messageHandler.sendMessage(logType, message);
     } catch (error) {
       if (error instanceof Error) {
-        console.log(colors.italic.dim(error.message))
+        console.log(colors.italic.dim(error.message));
       }
     }
   }

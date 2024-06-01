@@ -1,6 +1,6 @@
-import { ChannelId, TopicId } from "../types/logger";
+import { ChannelId, TopicId } from '../types/logger';
 
-// Telegram docs 
+// Telegram docs
 // https://core.telegram.org/bots/api#making-requests
 
 type TelegramMethod = 'sendMessage'
@@ -10,25 +10,24 @@ class TelegramBot {
   private botToken;
 
   constructor(botToken: string) {
-    this.botToken = botToken
+    this.botToken = botToken;
   }
   async sendMessage(channelId: ChannelId, message: string, topicId: TopicId) {
-
-    const messageUrl = this.constructUrl('sendMessage')
-    messageUrl.searchParams.append('chat_id', channelId)
-    messageUrl.searchParams.append('text', message)
-    // thread id 1 is the main channel so dont use thread 
+    const messageUrl = this.constructUrl('sendMessage');
+    messageUrl.searchParams.append('chat_id', channelId);
+    messageUrl.searchParams.append('text', message);
+    // thread id 1 is the main channel so dont use thread
     if (topicId !== 1) {
-      messageUrl.searchParams.append('message_thread_id', topicId.toString())
+      messageUrl.searchParams.append('message_thread_id', topicId.toString());
     }
 
     try {
       const res = await fetch(messageUrl, {
-        method: 'POST'
+        method: 'POST',
       });
       if (!res.ok) {
-        const resJson = await res.json()
-        // Handle HTTP errors
+        const resJson = await res.json();
+        // eslint-disable-next-line max-len
         throw new Error(`HTTP telegram failed to send message error! status: ${res.status}, message: ${resJson?.description}`);
       }
     } catch (err) {
@@ -38,9 +37,9 @@ class TelegramBot {
   }
 
   private constructUrl(method: TelegramMethod): URL {
-    const url: TelegramUrl = `https://api.telegram.org/bot${this.botToken}/${method}`
-    return new URL(url)
+    const url: TelegramUrl = `https://api.telegram.org/bot${this.botToken}/${method}`;
+    return new URL(url);
   }
 }
 
-export { TelegramBot }
+export { TelegramBot };

@@ -1,8 +1,7 @@
-import colors from 'colors'
+import colors from 'colors';
 import { MessageSettings } from '../types/messageSetting';
-import { MessageHandler } from '../handler/logger/messageHandler';
 
-// design pattern 
+// design pattern
 // https://refactoring.guru/design-patterns/chain-of-responsibility
 
 interface Handler {
@@ -23,10 +22,10 @@ abstract class AbstractLogHandler implements Handler {
   }
 
   public get defaultLoggerMessage() {
-    return AbstractLogHandler._defaultMessage
+    return AbstractLogHandler._defaultMessage;
   }
   public get loggerMessage() {
-    return AbstractLogHandler._loggerMessage
+    return AbstractLogHandler._loggerMessage;
   }
 
   public handle(settings: MessageSettings) {
@@ -38,8 +37,8 @@ abstract class AbstractLogHandler implements Handler {
 class WithLogger extends AbstractLogHandler {
   private _logMessage: string;
   constructor(startMessage: string) {
-    super()
-    this._logMessage = startMessage
+    super();
+    this._logMessage = startMessage;
   }
   public handle(settings: MessageSettings) {
     AbstractLogHandler._loggerMessage = this._logMessage;
@@ -52,48 +51,47 @@ class WithLoggerName extends AbstractLogHandler {
   private readonly loggerName: string;
 
   constructor(loggerName: string) {
-    super()
+    super();
     this.loggerName = loggerName;
   }
   private getColorFunction(strData: string): string {
     switch (this.loggerName) {
-      case 'info':
-        return colors.white(strData);
-      case 'warn':
-        return colors.yellow(strData);
-      case 'error':
-        return colors.red(strData);
-      default:
-        return colors.blue(strData);
+    case 'info':
+      return colors.white(strData);
+    case 'warn':
+      return colors.yellow(strData);
+    case 'error':
+      return colors.red(strData);
+    default:
+      return colors.blue(strData);
     }
   }
   public handle(settings: MessageSettings) {
-
     let _loggerName = this.loggerName;
 
     const useColon = () => {
-      const colon = ':'
+      const colon = ':';
       if (settings.useColoredLogs) {
-        return this.getColorFunction(colon)
+        return this.getColorFunction(colon);
       }
-      return colon
-    }
+      return colon;
+    };
 
     if (!settings.useLoggerName) {
-      return
+      return;
     }
     if (settings.displayTime) {
       const time = Date.now();
-      _loggerName = this.loggerName + ' ' + time
+      _loggerName = this.loggerName + ' ' + time;
     }
     if (settings.useColoredLogs) {
-      _loggerName = this.getColorFunction(this.loggerName)
+      _loggerName = this.getColorFunction(this.loggerName);
     }
     AbstractLogHandler._loggerMessage = _loggerName + useColon() + ' ' + AbstractLogHandler._loggerMessage;
     return super.handle(settings);
   }
 }
-export { WithLoggerName, WithLogger }
+export { WithLoggerName, WithLogger };
 
 // const withLogger = new WithLogger('message')
 // const withLoggerName = new WithLoggerName('error')

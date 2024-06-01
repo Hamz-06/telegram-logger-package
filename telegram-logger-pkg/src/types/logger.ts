@@ -1,8 +1,8 @@
-//TODO: change Error type to ErrorLog or something else
+// TODO: change Error type to ErrorLog or something else
 
 export type DefaultLoggerName = 'info' | 'error' | 'warn'
 
-//Used internally
+// Used internally
 export type ErrorTopicMap = {
   [loggerName: string]: TopicId
 }
