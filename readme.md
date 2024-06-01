@@ -20,25 +20,31 @@ npm i telegram-error-logger
 
 ```js
 import {Logger} from 'telegram-error-logger';
-// First initialise the logger with your bot token that you create from bot father
 
-// Add the channels you want your error message to be sent to -> e.g send error messages to this channel
-Logger.initialise(process.env.BOT_TOKEN, {
-  // the topics invite link for more info look at prerequisites
-  error: 'https://t.me/c/2100966383/2', 
-  info: 'https://t.me/c/2100966383/1'
-})
+// First initialise the logger with your bot token that you create from bot father take a look at #prerequisites
+const botToken = 'xxx'
+// Initialise the logger with your bot token, this should only be called once
+const logger = Logger.initialise<'info' | 'error'>(
+  botToken,
+  {
+    displayConsoleLogs: true,
+    displayTelegramLogs: true,
+    useColoredLogs: true
+  }
+)
 
 // Get the instance of your logger
 const logger = Logger.getInstance()
+// Add the telegram channels to your logger
+logger
+  .with('info', 'https://t.me/c/2021285143/1')
+  .with('error','https://t.me/c/2021285143/6')
 
 //example of when to use the logger 
 try{
-  // If this request throws an error message
-  const res = await dynamoDB.putItem(params)
+  await dynamoDB.putItem(params)
 }catch(error){
-  // choose whether the error message should be asynchronous or not 
-  await logger.error(`FAILURE: ${error.message}`)
+  logger.logMessage('error', `FAILURE: ${error.message}`)
 }
 ```
 
@@ -63,8 +69,6 @@ try{
 5. Add your telegram bot to the private group chat you have made and give it admin rights. 
 <img src="./readme/add-bot.png" alt="drawing" width="400"/>
 
-7. (optional) Next rename the current topic from general to error
-<img src="./readme/rename-topic.png" alt="drawing" width="400"/>
 
 8. Click the share button for the topic that you need (in this case info), then click the share button and copy the link.
 <img src="./readme/share-topic.png" alt="drawing" width="800"/>
@@ -72,15 +76,9 @@ try{
 9. You will then use this link and paste it in the info section when you initialise the bot.
 <img src="./readme/rename-topic.png" alt="drawing" width="400"/>
 
-```js
-const setting = {
-  // paste the invite link for the info topic to the info section
-  info: 'https://t.me/c/2100966383/1'
-}
-```
-10. Have fun
+
 ## What does this package do
-Send your error, info and warning logs to telegram. 
+Send your error or custom message logs to telegram. 
 
 ## 🤖 Overview
 This is a view of my setup

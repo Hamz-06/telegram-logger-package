@@ -1,40 +1,30 @@
-import { ChannelId, ErrorTopicMap, ErrorType, ILoggerHandler, Settings } from "../../types/logger";
-import { MessageHandler } from "./messageHandler";
+import { ChatTopic } from '../../model/chatTopic';
+import { ILoggerHandler, TelegramInviteLink, Settings } from '../../types/logger';
+import { MessageHandler } from './messageHandler';
+import colors from 'colors';
 
-export class LoggerHandler implements ILoggerHandler {
+export class LoggerHandler<T> implements ILoggerHandler<T> {
+  private messageHandler: MessageHandler<T>;
+  private chatTopic: ChatTopic;
 
-  protected channelId: ChannelId;
-  protected errorTopic: ErrorTopicMap;
-  private messageHandler: MessageHandler;
+  constructor(botToken: string, settings?: Settings) {
+    this.chatTopic = new ChatTopic();
 
-  constructor(botToken: string, errorTopicMap: ErrorTopicMap, channelId: ChannelId, settings?: Settings) {
     const messageSettings = MessageHandler.constructSettings(settings);
-    this.messageHandler = new MessageHandler(botToken, messageSettings, channelId, errorTopicMap);
-    this.errorTopic = errorTopicMap;
-    this.channelId = channelId;
+    this.messageHandler = new MessageHandler<T>(botToken, this.chatTopic, messageSettings);
   }
 
-  private errorMessage(loggerType: ErrorType) {
-    return `You have not configured the ${loggerType} logger, add it to your config`;
+  protected appendNewChannel(loggerName: T, loggerInviteLink: TelegramInviteLink) {
+    this.chatTopic.validate(loggerName as string, loggerInviteLink);
   }
 
-  private async logMessage(message: string, type: ErrorType) {
-    if (!this.errorTopic[type]) {
-      console.error(this.errorMessage(type));
-      return;
+  public async logMessage(logType: T, message: string) {
+    try {
+      await this.messageHandler.sendMessage(logType, message);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(colors.italic.dim(error.message));
+      }
     }
-    await this.messageHandler.sendMessage(message, type);
-  }
-
-  async warn(message: string) {
-    await this.logMessage(message, 'warn');
-  }
-
-  async error(message: string) {
-    await this.logMessage(message, 'error');
-  }
-
-  async info(message: string) {
-    await this.logMessage(message, 'info');
   }
 }

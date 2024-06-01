@@ -1,48 +1,83 @@
-import { ChannelId, ErrorInviteLinkMap, ErrorTopicMap, ErrorType, InviteLinkForTopic, TopicId } from "../../src/types/logger"
+import { ChannelId, TelegramInviteLink, ErrorTopicMap } from '../../src/types/logger';
 
 type IsNumberParam = 'channelId' | 'topicId'
 
 
 class ChatTopic {
-  static validate(errorInviteLink: ErrorInviteLinkMap) {
-    const errorTopicMap: ErrorTopicMap = {}
-    const set = new Set<ChannelId>();
+  private errorTopicMap: ErrorTopicMap = {};
+  private channelIdSet = new Set<ChannelId>();
+  private loggerNameSet = new Set<string>();
+  private topicIdSet = new Set<number>();
 
-    Object.entries(errorInviteLink).map(([errorType, telegramInviteLink]) => {
-      const { channelId, topicId } = ChatTopic.getChatId(telegramInviteLink)
-      errorTopicMap[errorType as ErrorType] = topicId
-      set.add(channelId)
-    })
-    if (set.size < 1) throw new Error(`You must provide a topic channel with the appropiate error type`)
-    if (set.size !== 1) {
-      throw new Error('Channel Id must be the same for all channels: ' + Array.from(set))
+  public get channelId(): string {
+    if (this.channelIdSet.size <= 0) {
+      throw new Error('No channelId');
     }
-    const channelId = this.isNumber(set.values().next().value, 'channelId')
-    const createNewChannelId = ChatTopic.createChannelId(channelId.toString())
-    return {
-      channelId: createNewChannelId,
-      errorTopicMap
-    }
+    return this.channelIdSet.values().next().value;
   }
-  //TODO: add more validation
+  // TODO:ADD VALIDATION HERE
+  public getTopicId(loggerName: string): number {
+    const topicId = this.errorTopicMap[loggerName] || -1;
+    if (topicId === -1) {
+      throw new Error(`No topicId found for ${loggerName}, please add it in the initialisation`);
+    }
+    return topicId;
+  }
+
+  validate(loggerName: string, loggerInviteLink: TelegramInviteLink): void {
+    const _loggerSizeBefore = this.loggerNameSet.size;
+    const _topicIdSizBefore = this.topicIdSet.size;
+
+    const { channelId, topicId } = ChatTopic.getChatId(loggerInviteLink);
+
+    const newChannelId = ChatTopic.createChannelId(channelId);
+
+    this.channelIdSet.add(newChannelId);
+    this.loggerNameSet.add(loggerName);
+    this.topicIdSet.add(topicId);
+
+    const _loggerSizeAfter = this.loggerNameSet.size;
+    const _channelIdSizeAfter = this.channelIdSet.size;
+    const _topicIdSizeAfter = this.topicIdSet.size;
+
+    // has to be unique
+    if (_topicIdSizeAfter <= _topicIdSizBefore) {
+      throw new Error('Topic Id must be unique');
+    }
+    if (_loggerSizeAfter === _loggerSizeBefore) {
+      throw new Error('Logger name must be unique');
+    }
+    if (_channelIdSizeAfter > 1) {
+      throw new Error('Channel Id must be the same for all channels');
+    }
+    this.errorTopicMap[loggerName] = topicId;
+  }
+  // TODO: add more validation
   private static createChannelId = (channelId: ChannelId) => {
-    return `-100${channelId}`
-  }
+    return `-100${channelId}`;
+  };
 
-  private static getChatId(chatInviteLink: InviteLinkForTopic) {
+  private static validateInviteLink = (inviteLink: TelegramInviteLink) => {
+    // eslint-disable-next-line no-useless-escape
+    const urlPattern = new RegExp('^https:\/\/t\\.me\\/c\\/\\d+\\/\\d+$');
+    if (!urlPattern.test(inviteLink)) {
+      throw new Error('Invalid invite link');
+    }
+  };
+  private static getChatId(chatInviteLink: TelegramInviteLink) {
+    ChatTopic.validateInviteLink(chatInviteLink);
+
     const split = chatInviteLink.split('/');
-    // TODO: Add more validation check channelid length 
-    if (split.length !== 6) throw new Error('Invalid invite link')
-    const topicNumberId = ChatTopic.isNumber(split[5] as string, 'topicId')
+    const topicNumberId = ChatTopic.isNumber(split[5] as string, 'topicId');
     return {
       channelId: split[4] as ChannelId,
       topicId: topicNumberId,
     };
   }
   private static isNumber(value: string, type: IsNumberParam): number {
-    const intValue = Number(value)
-    if (isNaN(intValue)) throw new Error(`Invalid ${type} ${value}, must be a number`)
-    return intValue
+    const intValue = Number(value);
+    if (isNaN(intValue)) throw new Error(`Invalid ${type} ${value}, must be a number`);
+    return intValue;
   }
 }
-export { ChatTopic }
+export { ChatTopic };

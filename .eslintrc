@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "google",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "new-cap": "warn",
+    "require-jsdoc": "off",
+    "indent": ["warn", 2],
+    "max-len": ["warn", { "code": 120, "tabWidth": 2 }],
+    "object-curly-spacing": ["error", "always"],
+    "eol-last": ["error", "always"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "destructuredArrayIgnorePattern": "^_", "argsIgnorePattern": "^_" }]
+  }
+}

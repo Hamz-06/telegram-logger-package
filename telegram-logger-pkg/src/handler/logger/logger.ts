@@ -1,21 +1,23 @@
-import { ChatTopic } from '../../model/chatTopic';
-import { ErrorInviteLinkMap, Settings } from '../../types/logger';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TelegramInviteLink, Settings } from '../../types/logger';
 import { LoggerHandler } from './loggerHandler';
 
-export class Logger extends LoggerHandler {
-  static logger: Logger;
+export class Logger<T extends string> extends LoggerHandler<T> {
+  // TODO: find a way to remove any type
+  private static logger: Logger<any> | null;
 
-  static initialise(botToken: string, errorInviteLink: ErrorInviteLinkMap, settings?: Settings) {
+  static initialise<T extends string>(botToken: string, settings?: Settings): Logger<T> {
     if (!Logger.logger) {
-      const { channelId, errorTopicMap } = ChatTopic.validate(errorInviteLink)
-      Logger.logger = new Logger(botToken, errorTopicMap, channelId, settings);
+      Logger.logger = new Logger<T>(botToken, settings);
     }
     return Logger.logger;
   }
-  static getInstance(): Logger {
-    if (!Logger.logger) {
-      throw new Error('Logger is not initialized. Call initialize method first.');
-    }
-    return Logger.logger;
+  static reset() {
+    Logger.logger = null;
+  }
+
+  with(loggerName: T, loggerInviteLink: TelegramInviteLink): Logger<T> {
+    this.appendNewChannel(loggerName, loggerInviteLink);
+    return this;
   }
 }
