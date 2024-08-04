@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Settings, TelegramChannels } from '../../types/logger';
 import { LoggerHandler } from './loggerHandler';
 

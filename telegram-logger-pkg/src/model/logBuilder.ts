@@ -1,94 +1,103 @@
 import colors from 'colors';
 import { MessageSettings } from '../types/messageSetting';
+import { LogMessageHandler } from './logMessageHandler';
+import { OptionalMessage } from '../types/logger';
+import { extractErrorInfo } from '../helper/helper';
 
-// design pattern
 // https://refactoring.guru/design-patterns/chain-of-responsibility
+// Create msg -> append logger name -> append stack trace
 
-interface Handler {
-  setNext(handler: Handler): Handler;
-  handle(settings: MessageSettings): void;
-  get loggerMessage(): string;
-  get defaultLoggerMessage(): string
-}
+class CreateLoggerMessage extends LogMessageHandler {
+  private readonly logMessage: string;
 
-abstract class AbstractLogHandler implements Handler {
-  private nextHandler!: Handler;
-  static _loggerMessage = '';
-  static _defaultMessage = '';
-
-  public setNext(handler: Handler): Handler {
-    this.nextHandler = handler;
-    return handler;
-  }
-
-  public get defaultLoggerMessage() {
-    return AbstractLogHandler._defaultMessage;
-  }
-  public get loggerMessage() {
-    return AbstractLogHandler._loggerMessage;
-  }
-
-  public handle(settings: MessageSettings) {
-    if (this.nextHandler) {
-      return this.nextHandler.handle(settings);
-    }
-  }
-}
-class WithLogger extends AbstractLogHandler {
-  private _logMessage: string;
   constructor(startMessage: string) {
     super();
-    this._logMessage = startMessage;
+    this.logMessage = startMessage;
   }
+
   public handle(settings: MessageSettings) {
-    AbstractLogHandler._loggerMessage = this._logMessage;
-    AbstractLogHandler._defaultMessage = this._logMessage;
-    return super.handle(settings);
+    LogMessageHandler._loggerMessage = this.logMessage;
+    LogMessageHandler._defaultMessage = this.logMessage;
+    super.handle(settings);
   }
 }
 
-class WithLoggerName extends AbstractLogHandler {
+class AppendLoggerName extends LogMessageHandler {
   private readonly loggerName: string;
 
   constructor(loggerName: string) {
     super();
     this.loggerName = loggerName;
   }
-  private getColorFunction(strData: string): string {
+
+  private getColorFunction(): (str: string) => string {
     switch (this.loggerName) {
     case 'info':
-      return colors.white(strData);
+      return colors.white;
     case 'warn':
-      return colors.yellow(strData);
+      return colors.yellow;
     case 'error':
-      return colors.red(strData);
+      return colors.red;
     default:
-      return colors.blue(strData);
+      return colors.blue;
     }
   }
+
+  private formatLoggerName(useColoredLogs: boolean, displayTime: boolean): string {
+    let formattedLoggerName = this.loggerName;
+
+    if (displayTime) {
+      const time = new Date().toISOString();
+      formattedLoggerName += ` ${time}`;
+    }
+
+    if (useColoredLogs) {
+      formattedLoggerName = this.getColorFunction()(formattedLoggerName);
+    }
+
+    return formattedLoggerName;
+  }
+
   public handle(settings: MessageSettings) {
-    let _loggerName = this.loggerName;
+    if (settings.useLoggerName) {
+      const loggerName = this.formatLoggerName(settings.useColoredLogs, settings.displayTime);
+      const colon = settings.useColoredLogs ? this.getColorFunction()(':') : ':';
 
-    const useColon = () => {
-      const colon = ':';
-      if (settings.useColoredLogs) {
-        return this.getColorFunction(colon);
-      }
-      return colon;
-    };
+      LogMessageHandler._loggerMessage = `${loggerName}${colon} ${LogMessageHandler._loggerMessage}`;
+    }
 
-    if (!settings.useLoggerName) {
-      return;
-    }
-    if (settings.displayTime) {
-      const time = Date.now();
-      _loggerName = this.loggerName + ' ' + time;
-    }
-    if (settings.useColoredLogs) {
-      _loggerName = this.getColorFunction(this.loggerName);
-    }
-    AbstractLogHandler._loggerMessage = _loggerName + useColon() + ' ' + AbstractLogHandler._loggerMessage;
-    return super.handle(settings);
+    super.handle(settings);
   }
 }
-export { WithLoggerName, WithLogger };
+
+class AppendErrorStackTrace extends LogMessageHandler {
+  private optionalMessage : OptionalMessage | undefined;
+  constructor(optionalMessage?: OptionalMessage) {
+    super();
+    this.optionalMessage = optionalMessage;
+  }
+
+  public handle(settings: MessageSettings): void {
+    let errorMessage = '';
+    const error = this.optionalMessage?.error;
+    if (!error) return;
+
+    const { additionalInfo, message, name, stack } = extractErrorInfo(error);
+
+    if (settings.displayStackTraceError) {
+      errorMessage += `\nSTACK TRACE: \n${stack}`;
+    } else {
+      // Stack trace contains this info
+      errorMessage = `${name}: ${message}`;
+    }
+
+    if (settings.displayAdditionalInfoError) {
+      errorMessage += `ADDITIONAL_INFO: \n${additionalInfo}`;
+    }
+    errorMessage = colors.italic.dim(errorMessage);
+    LogMessageHandler._loggerMessage = `${LogMessageHandler._loggerMessage} ${errorMessage}`;
+    super.handle(settings);
+  }
+}
+
+export { AppendLoggerName, AppendErrorStackTrace, CreateLoggerMessage };

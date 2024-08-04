@@ -24,31 +24,34 @@ npm i telegram-error-logger
 ```js
 //First create new file called initialise.ts this will create a single instance of your logger
 
-import {Logger} from 'telegram-error-logger';
+import {Logger, Settings, TelegramChannels} from 'telegram-error-logger';
 // Use your bot token that you created from bot father take a look at #prerequisites
 const botToken = 'xxx'
 
-const MyLogger = Logger.initialise<'info' | 'error'>(
-  botToken,
-  {
-    displayConsoleLogs: true,
-    displayTelegramLogs: true,
-    useColoredLogs: true
-  }
-).with('info', 'https://t.me/c/2021285143/1')
-.with('error','https://t.me/c/2021285143/6')
+const telegramChannel: TelegramChannels<'info' | 'error'> = {
+  error: 'https://t.me/c/2021285143/1',
+  info: 'https://t.me/c/2021285143/6',
+};
+const setting: Settings = {
+  displayConsoleLogs: true,
+  displayTelegramLogs: false,
+  useColoredLogs: true,
+  displayTime: true,
+};
 
-export {MyLogger} // will be initialized with the correct type
+const logger = new Logger<'info' | 'error'>(botToken, telegramChannel, setting);
+
+export {logger} // will be initialized with the correct type
 
 ```
 
 ```js
 //example of when to use the logger 
-import {MyLogger} from './initialise.ts'
+import {logger} from './initialise.ts'
 try{
   await dynamoDB.putItem(params)
 }catch(error){
-  MyLogger.logMessage('error', `FAILURE: ${error.message}`)
+  logger.logMessage('error', `FAILURE: ${error.message}`)
 }
 ```
 

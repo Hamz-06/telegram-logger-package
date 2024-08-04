@@ -85,15 +85,15 @@ describe('logger handler', () => {
     });
     describe('with display time', () => {
       describe('#enabled', () => {
-        beforeAll(() => {
+        beforeEach(() => {
           logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayTime: true });
-          jest.spyOn(Date, 'now').mockReturnValue(45633);
+          jest.spyOn(Date.prototype, 'toISOString').mockReturnValue('2024-08-04T21:59:13.586Z');
         });
 
         it('should log with time', async () => {
           await logger.logMessage('info', 'hello');
           expect(sendMessage).toHaveBeenCalled();
-          expect(consoleLogSpy).toHaveBeenCalledWith(`info 45633: hello`);
+          expect(consoleLogSpy).toHaveBeenCalledWith(`info 2024-08-04T21:59:13.586Z: hello`);
         });
       });
       describe('#disabled', () => {
@@ -131,6 +131,21 @@ describe('logger handler', () => {
           expect(consoleLogSpy).toHaveBeenCalledWith('info: hello');
         });
       });
+    });
+    describe('when stack trace enabled', ()=>{
+      const exampleError = new Error('example error');
+
+      describe('#disabled', () => {
+        beforeAll(() => {
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayStackTraceError: false });
+        });
+        it('should not log on telegram', async () => {
+          await logger.logMessage('info', 'hello', { error: exampleError });
+          expect(consoleLogSpy).toHaveBeenCalledWith(`info: hello ${colors.italic.dim('Error: example error')}`);
+        });
+      });
+
+      // TODO: add test for additional info
     });
   });
 });
