@@ -1,7 +1,10 @@
 import { Logger } from '../../../src/handler/logger/logger';
 import { MessageHandler } from '../../../src/handler/logger/messageHandler';
+import { TelegramChannels } from '../../../src/types/logger';
 import { MessageSettings } from '../../../src/types/messageSetting';
 import colors from 'colors';
+
+type ExampleChannel = 'warn' | 'info'
 
 const sendMessage = jest.fn();
 jest.mock('../../../src/model/telegramBot', () => {
@@ -16,14 +19,17 @@ jest.mock('../../../src/model/telegramBot', () => {
 
 describe('logger handler', () => {
   const botToken = 'your_bot_token';
-  let logger: Logger<'info' | 'warn' | 'error'>;
+  let logger: Logger<ExampleChannel>;
+  const telegramChannels: TelegramChannels<ExampleChannel> = {
+    info: 'https://t.me/c/12/12',
+    warn: 'https://t.me/c/12/13',
+  };
   let defaultMessage: MessageSettings;
   let consoleLogSpy: jest.SpyInstance;
 
   describe('message settings', () => {
     beforeEach(() => {
       consoleLogSpy = jest.spyOn(console, 'log');
-      Logger.reset();
       sendMessage.mockClear();
     });
 
@@ -34,15 +40,11 @@ describe('logger handler', () => {
     describe('with display console logs settings', () => {
       type LogTestCase = ['info' | 'warn', string, string];
       beforeEach(() => {
-        Logger.reset();
         consoleLogSpy.mockReset();
       });
       describe('#enabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'warn'>(botToken, { ...defaultMessage, displayConsoleLogs: true })
-            .with('info', 'https://t.me/c/12/12')
-            .with('warn', 'https://t.me/c/12/13');
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayConsoleLogs: true });
         });
         it.each<LogTestCase>([
           ['info', 'hello', 'info: hello'],
@@ -55,10 +57,7 @@ describe('logger handler', () => {
 
       describe('#disabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'warn'>(botToken, { ...defaultMessage, displayConsoleLogs: false })
-            .with('info', 'https://t.me/c/12/12')
-            .with('warn', 'https://t.me/c/12/13');
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayConsoleLogs: false });
         });
         it.each<LogTestCase>([
           ['info', 'hello', ''],
@@ -72,90 +71,64 @@ describe('logger handler', () => {
 
     // TODO: FIX THIS TEXT so it detects color
     xdescribe('with use colored logs', () => {
-      beforeEach(() => {
-        Logger.reset();
-      });
       describe('#enabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'error'>(botToken, { ...defaultMessage, useColoredLogs: true })
-            .with('info', 'https://t.me/c/12/12')
-            .with('error', 'https://t.me/c/12/13');
+          logger =new Logger(botToken, telegramChannels, { ...defaultMessage, useColoredLogs: true });
         });
+
         it('should log with color', async () => {
           const logMessageColorExpected = colors.red('error:') + ' ' + 'hello';
-          await logger.logMessage('error', 'hello');
+          await logger.logMessage('info', 'hello');
           expect(consoleLogSpy).toHaveBeenCalledWith(logMessageColorExpected);
         });
       });
     });
     describe('with display time', () => {
-      beforeEach(() => {
-        Logger.reset();
-      });
       describe('#enabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'error'>(botToken, { ...defaultMessage, displayTime: true })
-            .with('info', 'https://t.me/c/12/12')
-            .with('error', 'https://t.me/c/12/13');
-
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayTime: true });
           jest.spyOn(Date, 'now').mockReturnValue(45633);
         });
-        afterAll(() => {
-          jest.restoreAllMocks();
-        });
+
         it('should log with time', async () => {
-          await logger.logMessage('error', 'hello');
+          await logger.logMessage('info', 'hello');
           expect(sendMessage).toHaveBeenCalled();
-          expect(consoleLogSpy).toHaveBeenCalledWith(`error 45633: hello`);
+          expect(consoleLogSpy).toHaveBeenCalledWith(`info 45633: hello`);
         });
       });
       describe('#disabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'error'>(botToken, { ...defaultMessage, displayTime: false })
-            .with('info', 'https://t.me/c/12/12')
-            .with('error', 'https://t.me/c/12/13');
+          logger =new Logger(botToken, telegramChannels, { ...defaultMessage, displayTime: false });
         });
         afterAll(() => {
           jest.restoreAllMocks();
         });
         it('should log with time', async () => {
-          await logger.logMessage('error', 'hello');
+          await logger.logMessage('info', 'hello');
           expect(sendMessage).toHaveBeenCalled();
-          expect(consoleLogSpy).toHaveBeenCalledWith(`error: hello`);
+          expect(consoleLogSpy).toHaveBeenCalledWith(`info: hello`);
         });
       });
     });
     describe('with display telegrams logs', () => {
-      beforeEach(() => {
-        Logger.reset();
-      });
       describe('#disabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'error'>(botToken, { ...defaultMessage, displayTelegramLogs: false })
-            .with('info', 'https://t.me/c/12/12')
-            .with('error', 'https://t.me/c/12/13');
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayTelegramLogs: false });
         });
         it('should not log on telegram', async () => {
-          await logger.logMessage('error', 'hello');
+          await logger.logMessage('info', 'hello');
           expect(sendMessage).toHaveBeenCalledTimes(0);
-          expect(consoleLogSpy).toHaveBeenCalledWith('error: hello');
+          expect(consoleLogSpy).toHaveBeenCalledWith('info: hello');
         });
       });
       describe('#enabled', () => {
         beforeAll(() => {
-          logger = Logger
-            .initialise<'info' | 'error'>(botToken, { ...defaultMessage, displayTelegramLogs: true })
-            .with('info', 'https://t.me/c/12/12')
-            .with('error', 'https://t.me/c/12/13');
+          logger = new Logger(botToken, telegramChannels, { ...defaultMessage, displayTelegramLogs: true });
         });
         it('should log on telegram', async () => {
-          await logger.logMessage('error', 'hello');
+          await logger.logMessage('info', 'hello');
           expect(sendMessage).toHaveBeenCalledTimes(1);
-          expect(consoleLogSpy).toHaveBeenCalledWith('error: hello');
+          expect(consoleLogSpy).toHaveBeenCalledWith('info: hello');
         });
       });
     });

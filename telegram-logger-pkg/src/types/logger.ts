@@ -10,6 +10,12 @@ export type ErrorTopicMap = {
 export interface ILoggerHandler<T> {
   logMessage(logType: T, message: string): void;
 }
+/**
+ * Paramter that is passed into the constructor
+ */
+export type TelegramChannels<T extends string> = {
+  [loggerName in T]: TelegramInviteLink;
+};
 
 export type Settings = {
   /**

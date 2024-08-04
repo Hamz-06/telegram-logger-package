@@ -1,57 +1,59 @@
 import { Logger } from '../../../src/handler/logger/logger';
-import { TelegramInviteLink } from '../../../src/types/logger';
+import { TelegramChannels, TelegramInviteLink } from '../../../src/types/logger';
+
+type ExampleChannel = 'warn' | 'info'
 
 describe('Logger', () => {
   const botToken = 'your_bot_token';
+  const telegramChannels: TelegramChannels<ExampleChannel> ={
+    warn: 'https://t.me/c/12/13',
+    info: 'https://t.me/c/12/12',
+  };
 
-  beforeEach(() => {
-    Logger.reset();
-  });
   describe('when invoking the logger twice', () => {
-    it('should return the same instance when called', () => {
-      const logger1 = Logger.initialise<'warn'>(botToken, {});
-      const logger2 = Logger.initialise<'warn'>(botToken, {});
+    it('should return two different instances when called', () => {
+      const logger1 = new Logger(botToken, telegramChannels, {});
+      const logger2 = new Logger(botToken, telegramChannels, {});
 
-      expect(logger1).toBe(logger2);
+      expect(logger1).not.toBe(logger2);
     });
   });
-  describe('when invoking the logger twice with diffent generic', () => {
-    it('should return the same instance when called', () => {
-      const logger1 = Logger.initialise<'warn' | 'info'>(botToken, {});
-      const logger2 = Logger.initialise<'warn'>(botToken, {});
 
-      expect(logger1).toBe(logger2);
+  describe('with an empty setting option', () => {
+    it('should pass and use the default setting', ()=>{
+      const logger1 = ()=>new Logger(botToken, telegramChannels);
+      expect(logger1).not.toThrow();
     });
   });
-  describe('when creating the logger with the same logger name', () => {
-    it('should throw an error', () => {
-      const logger1 = Logger.initialise<'warn' | 'info'>(botToken, {});
-      const cb = () => logger1
-        .with('warn', 'https://t.me/c/12/13')
-        .with('warn', 'https://t.me/c/12/12');
-      expect(cb).toThrow('Logger name must be unique');
-    });
-  });
-  describe('when creating the logger with the same logger name in a differnt instance', () => {
-    it('should throw an error', () => {
-      // will throw an error as it's one instance (singleton instance)
-      const logger1 = Logger.initialise<'warn' | 'info'>(botToken, {});
-      const logger2 = Logger.initialise<'warn' | 'info'>(botToken, {});
-      const cb = () => {
-        logger1.with('warn', 'https://t.me/c/12/12');
-        logger2.with('warn', 'https://t.me/c/12/14');
-      };
-      expect(cb).toThrow('Logger name must be unique');
-    });
-  });
+
+
   describe('with an invalid telegram url', () => {
-    let incorrectTelegramUrl: TelegramInviteLink;
-    beforeAll(() => {
-      incorrectTelegramUrl = 'https://t.me/c/12/12/wrong' as TelegramInviteLink;
+    describe('with duplicate telegram URLs', ()=>{
+      it('should throw an error', () => {
+        const duplicateChannels: TelegramChannels<ExampleChannel> ={
+          warn: 'https://t.me/c/12/12',
+          info: 'https://t.me/c/12/12',
+        };
+        const logger1 =()=> new Logger<ExampleChannel>(botToken, duplicateChannels);
+        expect(logger1).toThrow();
+      });
     });
-    it('should throw an error', () => {
-      const logger1 = Logger.initialise<'warn' | 'info'>(botToken, {});
-      expect(() => logger1.with('warn', incorrectTelegramUrl)).toThrow('Invalid invite link');
+
+    describe('with invalid telegram url', ()=>{
+      let invalidTelegramChannel: TelegramChannels<ExampleChannel>;
+
+      beforeAll(() => {
+        const incorrectTelegramUrl = 'https://t.me/c/12/12/wrong' as TelegramInviteLink;
+        invalidTelegramChannel= {
+          info: incorrectTelegramUrl,
+          warn: 'https://t.me/c/12/13',
+        };
+      });
+
+      it('should throw an error', ()=>{
+        const logger1 =()=> new Logger<ExampleChannel>(botToken, invalidTelegramChannel);
+        expect(logger1).toThrow();
+      });
     });
   });
 });

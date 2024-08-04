@@ -92,15 +92,3 @@ class WithLoggerName extends AbstractLogHandler {
   }
 }
 export { WithLoggerName, WithLogger };
-
-// const withLogger = new WithLogger('message')
-// const withLoggerName = new WithLoggerName('error')
-// const setting = {
-//   ...MessageHandler.constructSettings({}),
-//   'useColoredLogs': true
-// }
-
-// withLogger.setNext(withLoggerName)
-// withLogger.handle(setting)
-
-// console.log(withLogger.loggerMessage)
