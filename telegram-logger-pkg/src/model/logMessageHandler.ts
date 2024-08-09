@@ -3,16 +3,14 @@ import { MessageSettings } from '../types/messageSetting';
 interface Handler {
   setNext(handler: Handler): Handler;
   handle(settings: MessageSettings): void;
-  get consoleLogMessage(): string;
-  get telegramLogMessage(): string
-  get defaultMessage(): string;
+  get consoleMessage(): string;
+  get telegramMessage(): string;
+
 }
 
 abstract class LogMessageHandler implements Handler {
   private nextHandler?: Handler;
   private static _consoleLogMessage = '';
-  private static _telegramLogMessage = '';
-  private static _defaultMessage = '';
 
   public setNext(handler: Handler): Handler {
     this.nextHandler = handler;
@@ -25,28 +23,20 @@ abstract class LogMessageHandler implements Handler {
     }
   }
 
-  public get defaultMessage() {
-    return LogMessageHandler._defaultMessage;
-  }
-  public get consoleLogMessage() {
+  public get consoleMessage() {
     return LogMessageHandler._consoleLogMessage;
   }
-  public get telegramLogMessage() {
-    return LogMessageHandler._telegramLogMessage;
+  public get telegramMessage() {
+    // eslint-disable-next-line no-control-regex
+    const ansiRegex = /\u001b\[\d{1,2}m/g;
+    return this.consoleMessage.replace(ansiRegex, '');
   }
 
-  protected setDefaultMessage(defaultMessage: string):void {
-    LogMessageHandler._defaultMessage = defaultMessage;
-    LogMessageHandler._consoleLogMessage = defaultMessage;
-    LogMessageHandler._telegramLogMessage = defaultMessage;
+  protected pushMessage(newMessage: string):void {
+    LogMessageHandler._consoleLogMessage += newMessage;
   }
-
-  protected updateConsoleLogMessage(updatedMessage: string):void {
+  protected updateMessage(updatedMessage: string):void {
     LogMessageHandler._consoleLogMessage = updatedMessage;
-  }
-
-  protected updateTelegramLogMessage(updatedMessage: string):void {
-    LogMessageHandler._telegramLogMessage = updatedMessage;
   }
 }
 export { LogMessageHandler };
