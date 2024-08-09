@@ -5,24 +5,57 @@ import { OptionalMessage } from '../types/logger';
 import { extractErrorInfo } from '../helper/helper';
 
 // https://refactoring.guru/design-patterns/chain-of-responsibility
-// Create msg -> append logger name -> append stack trace
+// logger name -> logger date -> append color -> append message -> append error
 
-class CreateLoggerMessage extends LogMessageHandler {
-  private readonly logMessage: string;
 
-  constructor(startMessage: string) {
+class AppendLoggerName extends LogMessageHandler {
+  private readonly loggerName: string;
+  constructor(loggerName: string) {
     super();
-    this.logMessage = startMessage;
+    this.loggerName = loggerName;
   }
+  public handle(settings: MessageSettings): void {
+    const { useLoggerName } = settings;
 
-  public handle(settings: MessageSettings) {
-    LogMessageHandler._loggerMessage = this.logMessage;
-    LogMessageHandler._defaultMessage = this.logMessage;
+    if (useLoggerName) {
+      this.updateConsoleLogMessage(`${this.loggerName}::`);
+      this.updateTelegramLogMessage(`${this.loggerName}::`);
+    }
     super.handle(settings);
   }
 }
 
-class AppendLoggerName extends LogMessageHandler {
+
+class AppendLoggerDate extends LogMessageHandler {
+  private appendDate():string {
+    return new Date().toISOString();
+  }
+
+  public handle(settings: MessageSettings) {
+    const { displayTime } = settings;
+
+    if (displayTime) {
+      const date= this.appendDate();
+      this.updateConsoleLogMessage(`${this.consoleLogMessage}${date}`);
+      this.updateTelegramLogMessage(`${this.telegramLogMessage}${date}`);
+    }
+    super.handle(settings);
+  }
+}
+
+class AppendLoggerMessage extends LogMessageHandler {
+  private readonly message: string;
+  constructor(defaultMessage: string) {
+    super();
+    this.message = defaultMessage;
+  }
+  public handle(settings: MessageSettings): void {
+    this.updateConsoleLogMessage(`${this.consoleLogMessage} ${this.message}`);
+    this.updateTelegramLogMessage(`${this.telegramLogMessage} ${this.message}`);
+    super.handle(settings);
+  }
+}
+class AppendColor extends LogMessageHandler {
   private readonly loggerName: string;
 
   constructor(loggerName: string) {
@@ -42,28 +75,12 @@ class AppendLoggerName extends LogMessageHandler {
       return colors.blue;
     }
   }
-
-  private formatLoggerName(useColoredLogs: boolean, displayTime: boolean): string {
-    let formattedLoggerName = this.loggerName;
-
-    if (displayTime) {
-      const time = new Date().toISOString();
-      formattedLoggerName += ` ${time}`;
-    }
+  public handle(settings: MessageSettings): void {
+    const { useColoredLogs } = settings;
 
     if (useColoredLogs) {
-      formattedLoggerName = this.getColorFunction()(formattedLoggerName);
-    }
-
-    return formattedLoggerName;
-  }
-
-  public handle(settings: MessageSettings) {
-    if (settings.useLoggerName) {
-      const loggerName = this.formatLoggerName(settings.useColoredLogs, settings.displayTime);
-      const colon = settings.useColoredLogs ? this.getColorFunction()(':') : ':';
-
-      LogMessageHandler._loggerMessage = `${loggerName}${colon} ${LogMessageHandler._loggerMessage}`;
+      const coloredLogger = this.getColorFunction()(this.consoleLogMessage);
+      this.updateConsoleLogMessage(coloredLogger);
     }
 
     super.handle(settings);
@@ -87,17 +104,23 @@ class AppendErrorStackTrace extends LogMessageHandler {
     if (settings.displayStackTraceError) {
       errorMessage += `\nSTACK TRACE: \n${stack}`;
     } else {
-      // Stack trace contains this info
+      // Stack trace contains the error name and message
       errorMessage = `${name}: ${message}`;
     }
 
     if (settings.displayAdditionalInfoError) {
       errorMessage += `ADDITIONAL_INFO: \n${additionalInfo}`;
     }
-    errorMessage = colors.italic.dim(errorMessage);
-    LogMessageHandler._loggerMessage = `${LogMessageHandler._loggerMessage} ${errorMessage}`;
+
+    const updatedLogMessage = `${this.consoleLogMessage} \n ${colors.italic.dim(errorMessage)}`;
+    const updatedTelegramMessage = `${this.telegramLogMessage} \n ${errorMessage}`;
+
+    this.updateConsoleLogMessage(updatedLogMessage);
+    this.updateTelegramLogMessage(updatedTelegramMessage);
+
     super.handle(settings);
   }
 }
 
-export { AppendLoggerName, AppendErrorStackTrace, CreateLoggerMessage };
+export { AppendLoggerDate, AppendErrorStackTrace, AppendColor,
+  AppendLoggerName, AppendLoggerMessage };

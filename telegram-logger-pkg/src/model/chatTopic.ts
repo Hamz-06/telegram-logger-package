@@ -2,7 +2,6 @@ import { ChannelId, TelegramInviteLink, ErrorTopicMap } from '../../src/types/lo
 
 type IsNumberParam = 'channelId' | 'topicId'
 
-
 class ChatTopic {
   private errorTopicMap: ErrorTopicMap = {};
   private channelIdSet = new Set<ChannelId>();

@@ -9,9 +9,9 @@ export class LoggerHandler<T extends string> implements ILoggerHandler<T> {
   private chatTopic: ChatTopic;
 
   constructor(botToken: string, settings?: Settings) {
-    this.chatTopic = new ChatTopic();
-
     const messageSettings = MessageHandler.constructSettings(settings);
+
+    this.chatTopic = new ChatTopic();
     this.messageHandler = new MessageHandler<T>(botToken, this.chatTopic, messageSettings);
   }
 

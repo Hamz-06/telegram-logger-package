@@ -2,7 +2,8 @@ import { OptionalMessage, Settings } from '../../types/logger';
 import { MessageSettings } from '../../types/messageSetting';
 import { TelegramBot } from '../../model/telegramBot';
 import { ChatTopic } from '../../model/chatTopic';
-import { AppendErrorStackTrace, AppendLoggerName, CreateLoggerMessage } from '../../model/logBuilder';
+import { AppendErrorStackTrace, AppendColor, AppendLoggerDate, AppendLoggerName,
+  AppendLoggerMessage } from '../../model/logBuilder';
 
 class MessageHandler<T> {
   private messageSettings: MessageSettings;
@@ -19,20 +20,31 @@ class MessageHandler<T> {
     // should be validated in the logger handler (so cast is fine)
     const topicId = this.chatTopic.getTopicId(loggerName as string);
 
-    const loggerBuilder = new CreateLoggerMessage(message);
     const appendLoggerName = new AppendLoggerName(loggerName as string);
+    const appendLoggerDate = new AppendLoggerDate();
+    const appendColor = new AppendColor(loggerName as string);
+    const loggerMessage = new AppendLoggerMessage(message);
     const appendLoggerError = new AppendErrorStackTrace(optionalMessage);
 
-    loggerBuilder.setNext(appendLoggerName);
-    appendLoggerName.setNext(appendLoggerError);
 
-    loggerBuilder.handle(this.messageSettings);
+    appendLoggerName.setNext(appendLoggerDate);
+    appendLoggerDate.setNext(appendColor);
+    appendColor.setNext(loggerMessage);
+    loggerMessage.setNext(appendLoggerError);
 
+    appendLoggerName.handle(this.messageSettings);
+
+    console.log(`😡
+
+      ${appendLoggerName.telegramLogMessage}
+      ${appendLoggerName.consoleLogMessage}
+
+      😡`);
     if (this.messageSettings.displayTelegramLogs) {
-      await this.telegramBot.sendMessage(this.chatTopic.channelId, loggerBuilder.loggerMessage, topicId);
+      await this.telegramBot.sendMessage(this.chatTopic.channelId, appendLoggerName.telegramLogMessage, topicId);
     }
     if (this.messageSettings.displayConsoleLogs) {
-      console.log(loggerBuilder.loggerMessage);
+      console.log(appendLoggerName.consoleLogMessage);
     }
   }
 
