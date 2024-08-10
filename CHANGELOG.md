@@ -1,5 +1,15 @@
 # telegram-error-logger
 
+## 0.4.0
+
+### Minor Changes
+
+- 87172f1: Remove singleton creation when instantiating logger
+  Use ISO for date
+  Updated readme
+  Updated logger builder
+  Added error stack trace
+
 ## 0.3.0
 
 ### Minor Changes
