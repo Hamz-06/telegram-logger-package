@@ -104,7 +104,7 @@ class AppendErrorStackTrace extends LogMessageHandler {
     }
 
     if (settings.displayAdditionalInfoError) {
-      errorMessage += `ADDITIONAL_INFO: \n${additionalInfo}`;
+      errorMessage += `\nADDITIONAL INFO: \n${additionalInfo}`;
     }
 
     const updatedLogMessage = `\n ${colors.italic.dim(errorMessage)}`;
