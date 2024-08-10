@@ -1,8 +1,10 @@
-import { Settings } from '../../types/logger';
+import { OptionalMessage, Settings } from '../../types/logger';
 import { MessageSettings } from '../../types/messageSetting';
 import { TelegramBot } from '../../model/telegramBot';
 import { ChatTopic } from '../../model/chatTopic';
-import { WithLogger, WithLoggerName } from '../../model/logBuilder';
+import { AppendErrorStackTrace, AppendColor, AppendDate, AppendLoggerName,
+  AppendMessage,
+  TrimMessage } from '../../model/logBuilder';
 
 class MessageHandler<T> {
   private messageSettings: MessageSettings;
@@ -15,22 +17,31 @@ class MessageHandler<T> {
     this.messageSettings = settings;
   }
 
-  async sendMessage(loggerName: T, message: string) {
+  async sendMessage(loggerName: T, message: string, optionalMessage?: OptionalMessage) {
     // should be validated in the logger handler (so cast is fine)
-
     const topicId = this.chatTopic.getTopicId(loggerName as string);
 
-    const withLogger = new WithLogger(message);
-    const withLoggerName = new WithLoggerName(loggerName as string);
+    const appendLoggerName = new AppendLoggerName(loggerName as string);
+    const appendLoggerDate = new AppendDate();
+    const appendColor = new AppendColor(loggerName as string);
+    const loggerMessage = new AppendMessage(message);
+    const appendLoggerError = new AppendErrorStackTrace(optionalMessage);
+    const trimMessage = new TrimMessage();
 
-    withLogger.setNext(withLoggerName);
-    withLogger.handle(this.messageSettings);
+
+    appendLoggerName.setNext(appendLoggerDate);
+    appendLoggerDate.setNext(appendColor);
+    appendColor.setNext(loggerMessage);
+    loggerMessage.setNext(appendLoggerError);
+    appendLoggerError.setNext(trimMessage);
+
+    appendLoggerName.handle(this.messageSettings);
 
     if (this.messageSettings.displayTelegramLogs) {
-      await this.telegramBot.sendMessage(this.chatTopic.channelId, withLogger.defaultLoggerMessage, topicId);
+      await this.telegramBot.sendMessage(this.chatTopic.channelId, appendLoggerName.telegramMessage, topicId);
     }
     if (this.messageSettings.displayConsoleLogs) {
-      console.log(withLogger.loggerMessage);
+      console.log(appendLoggerName.consoleMessage);
     }
   }
 
@@ -41,6 +52,8 @@ class MessageHandler<T> {
       useColoredLogs: settings?.useColoredLogs ?? false,
       displayTime: settings?.displayTime ?? false,
       useLoggerName: settings?.useLoggerName ?? true,
+      displayAdditionalInfoError: settings?.displayAdditionalInfoError ?? false,
+      displayStackTraceError: settings?.displayStackTraceError?? false,
     };
   }
 }

@@ -7,6 +7,9 @@ Monitor server errors in real-time via Telegram. [Telegram Bot API](https://core
 
 [![npm package](https://img.shields.io/npm/v/telegram-error-logger?logo=npm&style=flat-square)](https://www.npmjs.com/package/telegram-error-logger)
 
+## What does this package do
+Send error or custom logs to telegram. Seperate your logs via telegram topic channels.
+
 </div>
 
 ## 📦 Install
@@ -19,28 +22,32 @@ npm i telegram-error-logger
 [prerequisites setup 🔴](#prerequisites)
 
 ```js
-import {Logger} from 'telegram-error-logger';
+//First create new file called initialise.ts this will create a single instance of your logger
 
-// First initialise the logger with your bot token that you create from bot father take a look at #prerequisites
+import {Logger, Settings, TelegramChannels} from 'telegram-error-logger';
+// Use your bot token that you created from bot father take a look at #prerequisites
 const botToken = 'xxx'
-// Initialise the logger with your bot token, this should only be called once
-const logger = Logger.initialise<'info' | 'error'>(
-  botToken,
-  {
-    displayConsoleLogs: true,
-    displayTelegramLogs: true,
-    useColoredLogs: true
-  }
-)
 
-// Get the instance of your logger
-const logger = Logger.getInstance()
-// Add the telegram channels to your logger
-logger
-  .with('info', 'https://t.me/c/2021285143/1')
-  .with('error','https://t.me/c/2021285143/6')
+const telegramChannel: TelegramChannels<'info' | 'error'> = {
+  error: 'https://t.me/c/2021285143/1',
+  info: 'https://t.me/c/2021285143/6',
+};
+const setting: Settings = {
+  displayConsoleLogs: true,
+  displayTelegramLogs: false,
+  useColoredLogs: true,
+  displayTime: true,
+};
 
+const logger = new Logger<'info' | 'error'>(botToken, telegramChannel, setting);
+
+export {logger} // will be initialized with the correct type
+
+```
+
+```js
 //example of when to use the logger 
+import {logger} from './initialise.ts'
 try{
   await dynamoDB.putItem(params)
 }catch(error){
@@ -50,7 +57,7 @@ try{
 
 <a name="prerequisites"></a>
 
-## 🔴 prerequisites 
+## Prerequisites 
 <b> Inorder to send messages (IMPORTANT!) </b>
 
 1. Create a telegram account
@@ -73,12 +80,6 @@ try{
 8. Click the share button for the topic that you need (in this case info), then click the share button and copy the link.
 <img src="./readme/share-topic.png" alt="drawing" width="800"/>
 
-9. You will then use this link and paste it in the info section when you initialise the bot.
-<img src="./readme/rename-topic.png" alt="drawing" width="400"/>
-
-
-## What does this package do
-Send your error or custom message logs to telegram. 
 
 ## 🤖 Overview
 This is a view of my setup

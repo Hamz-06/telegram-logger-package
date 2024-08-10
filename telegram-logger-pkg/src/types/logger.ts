@@ -10,6 +10,18 @@ export type ErrorTopicMap = {
 export interface ILoggerHandler<T> {
   logMessage(logType: T, message: string): void;
 }
+/**
+ * Paramter that is passed into the constructor
+ */
+export type TelegramChannels<T extends string> = {
+  [loggerName in T]: TelegramInviteLink;
+};
+/**
+ * Optional settings for the message
+ */
+export type OptionalMessage = {
+  error?: Error
+}
 
 export type Settings = {
   /**
@@ -36,6 +48,17 @@ export type Settings = {
    * Whether to use the logger name in the logs. Default is `true`.
    */
   useLoggerName?: boolean;
+
+  /**
+   * Display stack trace error messages. Default is `false`.
+   */
+  displayStackTraceError?: boolean
+
+  /**
+   *Display additionalInfo from error messages. Default is `false`.
+   */
+  displayAdditionalInfoError?:boolean
+
 };
 
 /**
