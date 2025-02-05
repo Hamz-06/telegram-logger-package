@@ -1,5 +1,11 @@
 # telegram-error-logger
 
+## 0.5.0
+
+### Minor Changes
+
+- d4613e7: bug fix - clear messages after being sent
+
 ## 0.4.0
 
 ### Minor Changes
