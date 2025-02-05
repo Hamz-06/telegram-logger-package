@@ -2,9 +2,11 @@ import { OptionalMessage, Settings } from '../../types/logger';
 import { MessageSettings } from '../../types/messageSetting';
 import { TelegramBot } from '../../model/telegramBot';
 import { ChatTopic } from '../../model/chatTopic';
-import { AppendErrorStackTrace, AppendColor, AppendDate, AppendLoggerName,
+import {
+  AppendErrorStackTrace, AppendColor, AppendDate, AppendLoggerName,
   AppendMessage,
-  TrimMessage } from '../../model/logBuilder';
+  TrimMessage,
+} from '../../model/logBuilder';
 
 class MessageHandler<T> {
   private messageSettings: MessageSettings;
@@ -38,11 +40,12 @@ class MessageHandler<T> {
     appendLoggerName.handle(this.messageSettings);
 
     if (this.messageSettings.displayTelegramLogs) {
-      await this.telegramBot.sendMessage(this.chatTopic.channelId, appendLoggerName.telegramMessage, topicId);
+      this.telegramBot.sendMessage(this.chatTopic.channelId, appendLoggerName.telegramMessage, topicId);
     }
     if (this.messageSettings.displayConsoleLogs) {
       console.log(appendLoggerName.consoleMessage);
     }
+    appendLoggerName.cleanMessage();
   }
 
   static constructSettings(settings?: Settings): MessageSettings {
@@ -53,7 +56,7 @@ class MessageHandler<T> {
       displayTime: settings?.displayTime ?? false,
       useLoggerName: settings?.useLoggerName ?? true,
       displayAdditionalInfoError: settings?.displayAdditionalInfoError ?? false,
-      displayStackTraceError: settings?.displayStackTraceError?? false,
+      displayStackTraceError: settings?.displayStackTraceError ?? false,
     };
   }
 }

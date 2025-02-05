@@ -1,5 +1,5 @@
 import { ChannelId, TopicId } from '../types/logger';
-
+import axios from 'axios';
 // Telegram docs
 // https://core.telegram.org/bots/api#making-requests
 
@@ -22,14 +22,7 @@ class TelegramBot {
     }
 
     try {
-      const res = await fetch(messageUrl, {
-        method: 'POST',
-      });
-      if (!res.ok) {
-        const resJson = await res.json();
-        // eslint-disable-next-line max-len
-        throw new Error(`HTTP telegram failed to send message error! status: ${res.status}, message: ${resJson?.description}`);
-      }
+      await axios.post(messageUrl.toString());
     } catch (err) {
       // This block catches both network errors and re-thrown HTTP errors
       throw new Error(err instanceof Error ? err.message : String(err));
