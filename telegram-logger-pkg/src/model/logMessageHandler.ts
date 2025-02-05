@@ -32,10 +32,14 @@ abstract class LogMessageHandler implements Handler {
     return this.consoleMessage.replace(ansiRegex, '');
   }
 
-  protected pushMessage(newMessage: string):void {
+  public cleanMessage(): void {
+    LogMessageHandler._consoleLogMessage = '';
+  }
+
+  protected pushMessage(newMessage: string): void {
     LogMessageHandler._consoleLogMessage += newMessage;
   }
-  protected updateMessage(updatedMessage: string):void {
+  protected updateMessage(updatedMessage: string): void {
     LogMessageHandler._consoleLogMessage = updatedMessage;
   }
 }
